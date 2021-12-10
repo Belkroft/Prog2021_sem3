@@ -1,0 +1,182 @@
+using System;
+using System.Collections.Generic;
+
+namespace lab_1
+{   
+    class Program
+    {
+        class Trade_control
+        {
+            List<string> p_name = new List<string>(); // NAME (LIST OF PRODUCTS)
+            List<int> p_price = new List<int>(); // PRICE (LIST OF PRODUCTS)
+            internal void Make_product(string name, int price)
+            {
+                for (int i = 0; i < p_name.Count; i++)
+                {
+                    if (p_name[i] == name)
+                    {
+                        Console.WriteLine("Same product name"); // ERROR
+                        break;
+                    }
+                }
+                p_name.Add(name);
+                p_price.Add(price);
+            }
+
+            List<Shop> s_list = new List<Shop>(); // LIST OF SHOPS
+            internal void Make_shop(string name, string address)
+            {
+                for (ushort i = 0; i < s_list.Count; i++)
+                {
+                    if (s_list[i].s_address == address)
+                    {
+                        Console.WriteLine("Same address"); // ERROR
+                        break;
+                    }
+                }
+
+                Shop shop = new Shop(name, address);
+
+                for (ushort i = 0; i < p_price.Count; i++)
+                {
+                    shop.s_counts.Add(0);
+                    shop.s_prices.Add(p_price[i]);
+                }
+                s_list.Add(shop);
+            }
+
+            private bool Check_id(ushort s_id, ushort p_id)
+            {
+                if (s_list.Count >= s_id & p_name.Count >= p_id)
+                {
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("ID ERROR");
+                    return false;
+                }
+            }
+
+            internal void Supply(ushort s_id, ushort p_id, ushort count) // SHOP_ID-PRODUCT_ID-COUNT
+            {
+                if (Check_id(s_id, p_id))
+                {
+                    s_list[s_id].s_counts[p_id] += count;
+                }
+            }
+
+            internal void Change_price(ushort s_id, ushort p_id, int new_price) // SHOP_ID-PRODUCT_ID-P_PRICE
+            {
+                if (Check_id(s_id, p_id))
+                {
+                    s_list[s_id].s_prices[p_id] = new_price;
+                }
+            }
+
+            internal Shop Find_cheap(ushort p_id, ushort count)
+            {
+                int min_price = 0;
+                short s_id = -1;
+                for (short i = 0; i < s_list.Count; i++)
+                {
+                    if (s_list[i].s_counts[p_id]>=count)
+                    {
+                        if ((min_price == 0) | (s_list[i].s_prices[p_id] < min_price))
+                        {
+                            min_price = s_list[i].s_prices[p_id];
+                            s_id = i;
+                        }
+                    }
+                }
+                if (s_id != -1)
+                {
+                    return s_list[s_id];
+                }
+                else
+                {
+                    Console.WriteLine("No such shop");
+                    return null;
+                }
+            }
+
+            internal bool Buy_list(ushort s_id, List<ushort> p_ids, List<ushort> counts, int money)
+            {
+                if (s_list.Count >= s_id & p_ids.Count == counts.Count & p_ids.Count == s_list[s_id].s_prices.Count)
+                {
+                    for (ushort i = 0; i < p_ids.Count; i++)
+                    {
+                        if (s_list[s_id].s_counts[p_ids[i]] >= counts[i])
+                        {
+                            money -= counts[i] * s_list[s_id].s_prices[p_ids[i]];
+                        }
+                    }
+                    if (money < 0)
+                    {
+                        Console.WriteLine("Not enough money");
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("ID ERROR");
+                    return false;
+                }
+            }
+        }
+        
+        class Shop
+        {
+            internal readonly string s_name;
+            internal readonly string s_address;
+            //internal uint income = 0;
+
+            internal List<ushort> s_counts = new List<ushort>();
+            internal List<int> s_prices = new List<int>();
+
+            internal Shop(string name, string address)
+            {
+                s_name = name;
+                s_address = address;
+            }
+        }
+        
+        static void Main(string[] args)
+        {
+            //----------ADD_PRODUCTS----------//
+            Trade_control Trade_control_1 = new Trade_control();
+            Trade_control_1.Make_product("Milk", 30);
+            Trade_control_1.Make_product("Bread", 10);
+            //----------ADD_PRODUCTS----------//
+
+            //----------ADD_SHOPS----------//
+            Trade_control_1.Make_shop("Bulochka", "Lenina 4");
+            Trade_control_1.Make_shop("Vil", "Lenina 8");
+            //----------ADD_SHOPS----------//
+
+            //----------ADD_PRODUCTS_TO_SHOP----------//
+            Trade_control_1.Supply(0, 0, 10);
+            Trade_control_1.Supply(0, 1, 10);
+            Trade_control_1.Supply(1, 0, 10);
+            //----------ADD_PRODUCTS_TO_SHOP----------//
+
+            //----------CHANGE_PRICE----------//
+            Trade_control_1.Change_price(0, 0, 31);
+            //----------CHANGE_PRICE----------//
+
+            //----------FIND_CHEAP----------//
+            Console.WriteLine(Trade_control_1.Find_cheap(0, 10).s_name);
+            //----------FIND_CHEAP----------//
+
+            //----------BUY_LIST----------//
+            List<ushort> ides = new List<ushort>() { 0, 1 };
+            List<ushort> counts = new List<ushort>() { 10, 10 };
+            Trade_control_1.Buy_list(0, ides, counts, 1000);
+            //----------BUY LIST----------//
+        }
+    }
+}
