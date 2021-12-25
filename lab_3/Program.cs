@@ -10,7 +10,6 @@ namespace Backups
     {
         class Backup_job
         {
-            //List<List<string>> rp_info = new List<List<string>>(); // IFNO ALL RESTORE POINTS
             private byte rp_num = 1;
             private readonly string rp_folder;
             List<FileInfo> active_files = new List<FileInfo>();
